@@ -1,1 +1,39 @@
- *Wikipedia-Event-Query*
+ - Wikipedia-Event-Query -
+ A collection of scripts in python that uses the Wikipedia API,
+ MongoDB and Flask to store data about events from wikipedia
+ pages (all days of the year) updated every two hours and
+ allows the user to query through this results in order to get
+ the events from a specific day in a specific year (in json
+ format).
+
+-> initialize_db.py
+Uses the wikipedia api to get the specific section from a page
+representing a date and an event category (Event, Birth, Death,
+Holidays and observances) and store them in a MongoDB server
+which runs on a specific IP and port (by default localhost).
+
+This script uses threads (no more than 8 at a time by default) to
+parse every page (from 1st 0f January to the 31st of December) and
+store them in a MongoDB server. The server is structured as follows:
+4 databases: 'evs', 'brts', 'dths', 'holo' representing the type
+of events and every database has a collection for each day. Each
+collection contains documents in the following format:
+
+					{'year' : year,
+					'day : day,
+					'category' : category,
+					'desc' : title}
+
+The script launches its threads every two hours and updates the
+database which is erased every time at the beginning. (it uses
+"schedule" to do this, for more info: https://github.com/dbader/schedule)
+
+-> server.py
+It uses the Flask framework to process requests for the database:
+
+http://127.0.0.1:5000/?year=2005&day=March_13&category=births
+
+and returns the query in JSON format (as specified):
+
+{"results":   [{"title":   "example",   "year":   2005,
+"day": "March_13", "category": "births"}, {"title": ... }]}
